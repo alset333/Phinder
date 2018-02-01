@@ -57,12 +57,11 @@ class ViewController: UIViewController {
 //        }
 //        print(list)
         
-        dataString += "SSID: " + currentSSIDs()[0] + "\n"
-        print("SSID: " + currentSSIDs()[0])
+//        dataString += "SSID: " + currentSSIDs()[0] + "\n"
+//        print("SSID: " + currentSSIDs()[0])
+//
         
         
-        
-        dataLabel.text = dataString
         
         
         
@@ -78,11 +77,18 @@ class ViewController: UIViewController {
             })
         }
         
+        let wifiData = getSSID()
         
         
+        let ssidText  = "SSID: " + String(describing: wifiData!["SSID"]!)
+        dataString += ssidText + "\n"
+        print(ssidText)
         
-        
-        
+        let bssidText = "BSSID: " + String(describing: wifiData!["BSSID"]!)
+        dataString += bssidText + "\n"
+        print(bssidText)
+
+        dataLabel.text = dataString
         
         
     }
@@ -90,21 +96,44 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+//
+//    func currentSSIDs() -> [String] {
+//        guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
+//            return []
+//        }
+//        return interfaceNames.flatMap { name in
+//            guard let info = CNCopyCurrentNetworkInfo(name as CFString) as? [String:AnyObject] else {
+//                return nil
+//            }
+//            guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
+//                return nil
+//            }
+//            return ssid
+//        }
+//    }
     
-    func currentSSIDs() -> [String] {
-        guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
-            return []
+    func getSSID() -> [String: AnyObject]? {
+        
+        let interfaces = CNCopySupportedInterfaces()
+        if interfaces == nil {
+            return nil
         }
-        return interfaceNames.flatMap { name in
-            guard let info = CNCopyCurrentNetworkInfo(name as CFString) as? [String:AnyObject] else {
-                return nil
-            }
-            guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
-                return nil
-            }
-            return ssid
+        
+        let interfacesArray = interfaces as! [String]
+        if interfacesArray.count <= 0 {
+            return nil
         }
+        
+        let interfaceName = interfacesArray[0] as String
+        let unsafeInterfaceData =     CNCopyCurrentNetworkInfo(interfaceName as CFString)
+        if unsafeInterfaceData == nil {
+            return nil
+        }
+        
+        let interfaceData = unsafeInterfaceData as! Dictionary <String,AnyObject>
+        return interfaceData
     }
+
 
 
 }
